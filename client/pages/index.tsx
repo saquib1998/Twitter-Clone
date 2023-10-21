@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { BsTwitter} from 'react-icons/bs'
 import { GoHomeFill} from 'react-icons/go'
 import { FiSearch } from 'react-icons/fi'
@@ -8,6 +8,7 @@ import { TbNotes } from 'react-icons/tb'
 import { AiOutlineUser } from 'react-icons/ai'
 import { CiCircleMore } from 'react-icons/ci'
 import FeedCard from './components/FeedCard'
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
 
 interface SidebarButton {
   title: string,
@@ -46,6 +47,11 @@ const sidebarMenuItems: SidebarButton[] = [
 ]
 
 export default function Home() {
+
+  const handleLoginWithGoogle = useCallback((cred : CredentialResponse) => {
+
+  }, [])
+
   return (
     <div>
       <div className='grid grid-cols-12 h-screen w-screen px-20'>
@@ -83,7 +89,12 @@ export default function Home() {
           <FeedCard />
           <FeedCard />
         </div>
-        <div className='col-span-3'></div>
+        <div className='col-span-3 p-5'>
+          <div className="border p-5 bg-slate-700 rounded-lg">
+            <h1 className='my-2 text-2xl'>New to Twitter?</h1>
+            <GoogleLogin onSuccess={cred => console.log(cred)} />
+          </div>
+        </div>
       </div>
     </div>
   )
