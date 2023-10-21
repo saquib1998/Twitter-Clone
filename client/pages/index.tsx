@@ -9,6 +9,9 @@ import { AiOutlineUser } from 'react-icons/ai'
 import { CiCircleMore } from 'react-icons/ci'
 import FeedCard from './components/FeedCard'
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
+import toast from 'react-hot-toast'
+import { graphqlClient } from '@/clients/api'
+import { verifyUserGoogleTokenQuery } from '@/graphql/queries/user'
 
 interface SidebarButton {
   title: string,
@@ -48,7 +51,15 @@ const sidebarMenuItems: SidebarButton[] = [
 
 export default function Home() {
 
-  const handleLoginWithGoogle = useCallback((cred : CredentialResponse) => {
+  const handleLoginWithGoogle = useCallback(async (cred : CredentialResponse) => {
+    const googleToken = cred.credential
+    if(!googleToken) return toast.error('Google token not found');
+    
+    const { verifyGoogleToken } = await graphqlClient.request(verifyUserGoogleTokenQuery, {token: googleToken});
+    toast.success('Verified Success');
+    console.log(verifyGoogleToken);
+
+    if(verifyGoogleToken) window.localStorage.setItem('twitter_token', verifyGoogleToken)
 
   }, [])
 
@@ -92,7 +103,7 @@ export default function Home() {
         <div className='col-span-3 p-5'>
           <div className="border p-5 bg-slate-700 rounded-lg">
             <h1 className='my-2 text-2xl'>New to Twitter?</h1>
-            <GoogleLogin onSuccess={cred => console.log(cred)} />
+            <GoogleLogin onSuccess={cred => {handleLoginWithGoogle(cred)}} />
           </div>
         </div>
       </div>
