@@ -12,6 +12,9 @@ import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
 import toast from 'react-hot-toast'
 import { graphqlClient } from '@/clients/api'
 import { verifyUserGoogleTokenQuery } from '@/graphql/queries/user'
+import { useCurrentUser } from '@/hooks/user'
+import { useQueryClient } from '@tanstack/react-query'
+import Image from 'next/image'
 
 interface SidebarButton {
   title: string,
@@ -51,6 +54,9 @@ const sidebarMenuItems: SidebarButton[] = [
 
 export default function Home() {
 
+  const {user} = useCurrentUser()
+  const queryClient = useQueryClient()
+
   const handleLoginWithGoogle = useCallback(async (cred : CredentialResponse) => {
     const googleToken = cred.credential
     if(!googleToken) return toast.error('Google token not found');
@@ -60,13 +66,14 @@ export default function Home() {
     console.log(verifyGoogleToken);
 
     if(verifyGoogleToken) window.localStorage.setItem('twitter_token', verifyGoogleToken)
-
-  }, [])
+    
+    await queryClient.invalidateQueries(["current-user"]);
+  }, [queryClient])
 
   return (
     <div>
       <div className='grid grid-cols-12 h-screen w-screen px-20'>
-        <div className='col-span-3 pt-1 px-4 pl-14'>
+        <div className='col-span-3 pt-1 px-4 pl-14 relative'>
           <div className="h-fit w-fit text-4xl hover:bg-gray-800 rounded-full p-2 px-5 cursor-pointer transition-all">
             <BsTwitter/>
           </div>
@@ -82,6 +89,21 @@ export default function Home() {
               <button className='bg-[#1d9bf0] font-semibold text-lg p-4 rounded-full w-full'>Tweet</button>
             </div>
           </div>
+          {user && <div className='absolute bottom-5 flex gap-2 items-center hover:bg-slate-800 px-3 py-2 rounded-full'>
+            {user && user.profileImageUrl &&(
+            <Image 
+              className="rounded-full" 
+              src={user?.profileImageUrl}
+              alt="user-image"
+              height={50}
+              width={50} />
+            )}
+            <div>
+              <h3 className='text-xl'>
+                {user.firstName} {user.lastName}
+                </h3>
+            </div>
+          </div>}
         </div>
         <div className='col-span-5 h-screen overflow-scroll border-l-[0.2px] border-r-[0.2px] border-gray-600'>
           <FeedCard />
@@ -101,10 +123,10 @@ export default function Home() {
           <FeedCard />
         </div>
         <div className='col-span-3 p-5'>
-          <div className="border p-5 bg-slate-700 rounded-lg">
+          {!user && <div className="border p-5 bg-slate-700 rounded-lg">
             <h1 className='my-2 text-2xl'>New to Twitter?</h1>
             <GoogleLogin onSuccess={cred => {handleLoginWithGoogle(cred)}} />
-          </div>
+          </div>}
         </div>
       </div>
     </div>
