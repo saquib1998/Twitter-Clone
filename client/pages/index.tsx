@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { BsTwitter} from 'react-icons/bs'
 import { GoHomeFill} from 'react-icons/go'
 import { FiSearch } from 'react-icons/fi'
@@ -15,6 +15,8 @@ import { verifyUserGoogleTokenQuery } from '@/graphql/queries/user'
 import { useCurrentUser } from '@/hooks/user'
 import { useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
+import { useCreatTweet, useGetAllTweets } from '@/hooks/tweet'
+import {Tweet} from '@/gql/graphql'
 
 interface SidebarButton {
   title: string,
@@ -55,6 +57,11 @@ const sidebarMenuItems: SidebarButton[] = [
 export default function Home() {
 
   const {user} = useCurrentUser()
+  const {tweets = []} = useGetAllTweets()
+  const {mutate} = useCreatTweet()
+
+  const [content, setContent] = useState('')
+
   const queryClient = useQueryClient()
 
   const handleLoginWithGoogle = useCallback(async (cred : CredentialResponse) => {
@@ -76,6 +83,12 @@ export default function Home() {
     input.setAttribute('accept', 'image/*')
     input.click()
   }, [])
+
+  const handleCreateTweet = useCallback(() => {
+    mutate({
+      content
+    })
+  }, [content, mutate])
 
   return (
     <div>
@@ -127,33 +140,23 @@ export default function Home() {
                   </div>
                   <div className="col-span-11">
                     <textarea 
+                      value={content}
+                      onChange={e => setContent(e.target.value)}
                       className='w-full bg-transparent text-xl px-3 border-b border-slate-700' 
                       placeholder='What is happening?!' rows={3}>
 
                     </textarea>
                     <div className='flex justify-between items-center'>
                       <BiImageAlt onClick={handleSelectImage} className="text-xl" />
-                      <button className='bg-[#1d9bf0] font-semibold text-sm py-2 px-4 rounded-full'>Tweet</button>
+                      <button onClick={handleCreateTweet} className='bg-[#1d9bf0] font-semibold text-sm py-2 px-4 rounded-full'>Tweet</button>
                     </div>
                   </div>
               </div>
             </div>
           </div>
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
+          {
+            tweets?.map(tweet => tweet ? <FeedCard key={tweet?.id} data={tweet as Tweet} /> : null)
+          }
         </div>
         <div className='col-span-3 p-5'>
           {!user && <div className="border p-5 bg-slate-700 rounded-lg">
