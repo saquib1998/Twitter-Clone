@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 import { BsTwitter} from 'react-icons/bs'
 import { GoHomeFill} from 'react-icons/go'
 import { FiSearch } from 'react-icons/fi'
-import { BiBell } from 'react-icons/bi'
+import { BiBell, BiImageAlt } from 'react-icons/bi'
 import { HiOutlineEnvelope } from 'react-icons/hi2'
 import { TbNotes } from 'react-icons/tb'
 import { AiOutlineUser } from 'react-icons/ai'
@@ -70,6 +70,13 @@ export default function Home() {
     await queryClient.invalidateQueries(["current-user"]);
   }, [queryClient])
 
+  const handleSelectImage = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*')
+    input.click()
+  }, [])
+
   return (
     <div>
       <div className='grid grid-cols-12 h-screen w-screen px-20'>
@@ -106,6 +113,32 @@ export default function Home() {
           </div>}
         </div>
         <div className='col-span-5 h-screen overflow-scroll border-l-[0.2px] border-r-[0.2px] border-gray-600'>
+          <div>
+            <div className="border border-l-0 border-r-0 border-gray-600 p-5 hover:bg-slate-900 transition-all cursor-pointer">
+              <div className="grid grid-cols-12 gap-2">
+                  <div className="col-span-1">
+                    {user?.profileImageUrl && <Image
+                      src={user.profileImageUrl}
+                      height={50}
+                      width={50}
+                      alt="user-profile-image"
+                      className="rounded-full"
+                    />}
+                  </div>
+                  <div className="col-span-11">
+                    <textarea 
+                      className='w-full bg-transparent text-xl px-3 border-b border-slate-700' 
+                      placeholder='What is happening?!' rows={3}>
+
+                    </textarea>
+                    <div className='flex justify-between items-center'>
+                      <BiImageAlt onClick={handleSelectImage} className="text-xl" />
+                      <button className='bg-[#1d9bf0] font-semibold text-sm py-2 px-4 rounded-full'>Tweet</button>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
           <FeedCard />
           <FeedCard />
           <FeedCard />
