@@ -1,57 +1,28 @@
 import { useCurrentUser } from "@/hooks/user";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { BsTwitter } from "react-icons/bs";
 import { GoHomeFill } from "react-icons/go";
 import { FiSearch } from "react-icons/fi";
-import { BiBell, BiImageAlt } from "react-icons/bi";
+import { BiBell } from "react-icons/bi";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import { TbNotes } from "react-icons/tb";
 import { AiOutlineUser } from "react-icons/ai";
 import { CiCircleMore } from "react-icons/ci";
-import FeedCard from "../FeedCard";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
-import { Tweet } from "@/gql/graphql";
 import toast from "react-hot-toast";
 import { graphqlClient } from "@/clients/api";
 import { verifyUserGoogleTokenQuery } from "@/graphql/queries/user";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 
 interface SidebarButton {
   title: string;
   icon: React.ReactNode;
+  link: string;
 }
 
-const sidebarMenuItems: SidebarButton[] = [
-  {
-    title: "Home",
-    icon: <GoHomeFill />,
-  },
-  {
-    title: "Explore",
-    icon: <FiSearch />,
-  },
-  {
-    title: "Notification",
-    icon: <BiBell />,
-  },
-  {
-    title: "Messages",
-    icon: <HiOutlineEnvelope />,
-  },
-  {
-    title: "Lists",
-    icon: <TbNotes />,
-  },
-  {
-    title: "Profile",
-    icon: <AiOutlineUser />,
-  },
-  {
-    title: "More",
-    icon: <CiCircleMore />,
-  },
-];
+
 
 interface TwitterLayoutProps {
   children: React.ReactNode;
@@ -60,6 +31,44 @@ interface TwitterLayoutProps {
 const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
   const { user } = useCurrentUser();
   const [content, setContent] = useState("");
+
+  const sidebarMenuItems: SidebarButton[] = useMemo(() => [
+    {
+      title: "Home",
+      icon: <GoHomeFill />,
+      link: '/'
+    },
+    {
+      title: "Explore",
+      icon: <FiSearch />,
+      link: '/'
+    },
+    {
+      title: "Notification",
+      icon: <BiBell />,
+      link: '/'
+    },
+    {
+      title: "Messages",
+      icon: <HiOutlineEnvelope />,
+      link: '/'
+    },
+    {
+      title: "Lists",
+      icon: <TbNotes />,
+      link: '/'
+    },
+    {
+      title: "Profile",
+      icon: <AiOutlineUser />,
+      link: `/${user?.id}`
+    },
+    {
+      title: "More",
+      icon: <CiCircleMore />,
+      link: '/'
+    },
+  ], [user?.id]);
 
   const queryClient = useQueryClient();
 
@@ -94,12 +103,12 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
             <div className="mt-4 text-xl pr-4">
               <ul>
                 {sidebarMenuItems.map((item) => (
-                  <li
-                    className="flex mt-2 justify-start items-center gap-4 hover:bg-gray-800 rounded-full px-3 py-3 w-fit cursor-pointer"
-                    key={item.title}
-                  >
-                    <span className="text-3xl">{item.icon}</span>
-                    <span className="hidden sm:inline">{item.title}</span>
+                  <li key={item.title}>
+                    <Link className="flex mt-2 justify-start items-center gap-4 hover:bg-gray-800 rounded-full px-3 py-3 w-fit cursor-pointer" 
+                      href={item.link}>
+                      <span className="text-3xl">{item.icon}</span>
+                      <span className="hidden sm:inline">{item.title}</span>
+                    </Link>
                   </li>
                 ))}
               </ul>
